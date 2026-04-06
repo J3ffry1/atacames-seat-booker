@@ -191,6 +191,10 @@ if (fs.existsSync(frontendPath)) {
   });
 }
 
-app.listen(port, () => {
-  console.log(`Backend server running on http://localhost:${port}`);
-});
+module.exports = app;
+
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Backend server running on http://localhost:${port}`);
+  });
+}
