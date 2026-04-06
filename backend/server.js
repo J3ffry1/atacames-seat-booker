@@ -32,9 +32,14 @@ pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
 });
 
-// Initialize database schema and optionally populate
+// Lazy-loading database initialization
+let dbInitialized = false;
+
 async function initDb() {
+  if (dbInitialized) return;
   try {
+    console.log('Initializing database...');
+    // ... rest of the logic
     await pool.query(`
       CREATE TABLE IF NOT EXISTS reservations (
         id SERIAL PRIMARY KEY,
@@ -84,7 +89,18 @@ async function initDb() {
   }
 }
 
-initDb();
+// Health check and root route
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', database: !!process.env.APP_DATABASE_URL });
+});
+
+// Middleware for lazy initDb
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api') && req.path !== '/api/health') {
+    await initDb();
+  }
+  next();
+});
 
 // Routes
 app.get('/api/reservations', async (req, res) => {
