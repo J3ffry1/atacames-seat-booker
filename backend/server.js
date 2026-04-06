@@ -19,9 +19,17 @@ if (fs.existsSync(frontendPath)) {
 }
 
 // Initialize PostgreSQL connection pool
+if (!process.env.APP_DATABASE_URL) {
+  console.error('FATAL: APP_DATABASE_URL is missing.');
+}
+
 const pool = new Pool({
   connectionString: process.env.APP_DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
 });
 
 // Initialize database schema and optionally populate
