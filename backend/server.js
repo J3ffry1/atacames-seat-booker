@@ -12,11 +12,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Servir frontend compilado
-const frontendPath = path.join(__dirname, '../frontend/dist');
-if (fs.existsSync(frontendPath)) {
-  app.use(express.static(frontendPath));
-}
+// No-op for static files in Vercel - handled by vercel.json routes
 
 // Initialize PostgreSQL connection pool
 if (!process.env.APP_DATABASE_URL) {
@@ -84,6 +80,7 @@ async function initDb() {
       }
     }
     console.log('Database initialized successfully.');
+    dbInitialized = true;
   } catch (error) {
     console.error('Error initializing database:', error);
   }
@@ -208,12 +205,7 @@ app.get('/api/export/csv', async (req, res) => {
   }
 });
 
-// Fallback para React Router
-if (fs.existsSync(frontendPath)) {
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
-  });
-}
+// Fallback para React Router no necesario en Serverless (manejado por vercel.json)
 
 module.exports = app;
 
